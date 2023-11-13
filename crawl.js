@@ -22,7 +22,8 @@ function getURLsFromHTML(htmlBody, baseURL) {
   const listOfUrls = [];
 
   const aLinks = dom.window.document.querySelectorAll('a')
-  for (const a of aLinks){
+  for (const a of aLinks) {
+
     //checking if has a path from b
     if (a.href.slice(0,1) === '/'){
       try {
@@ -30,7 +31,7 @@ function getURLsFromHTML(htmlBody, baseURL) {
       } catch (err){
         console.log(`${err.message}: ${a.href}`)
       }
-    } 
+    }
     else {
       try {
         listOfUrls.push(new URL(a.href).href)
@@ -39,11 +40,39 @@ function getURLsFromHTML(htmlBody, baseURL) {
       }
     }
   }
+  return listOfUrls;
+}
 
-  return listOfUrls
+//
+async function crawlPage(baseUrl, currUrl, pages) {
+  console.log(`crawling ${baseUrl}`)
+
+  try {
+
+    const response = await fetch(baseUrl)
+    if (response.status > 399)
+    {
+      console.log(`A ${response.status} error has occurred. Please try again`);
+      return ;
+    }
+    
+    const respType = response.headers.get('content-type');
+    if (respType.includes('text/html'))
+    {
+      console.log(`Got non-html response: ${respType}`);
+      return ;
+    }
+
+    console.log(await response.text)
+  } catch (err)
+  {
+    console.log(`${err.message}`)
+  }
+  
 }
 
 module.exports = {
   normalizeURL,
-  getURLsFromHTML
+  getURLsFromHTML,
+  crawlPage
 };
