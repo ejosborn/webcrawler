@@ -6,9 +6,9 @@ function normalizeURL(url) {
   const myURL = new URL(url);
   let path = myURL.pathname;
 
-  //slices last char off if is '/'
+  //slices last char off if is '/' to normalize URL
   //e.g. https://espn.com/nfl/ => https://espn.com/nfl
-  if (path.charAt(path.length - 1) == '/') {
+  if (path.charAt(path.length - 1) === '/') {
     path = path.slice(0, path.length - 1);
   }
 
@@ -20,17 +20,30 @@ function normalizeURL(url) {
 function getURLsFromHTML(htmlBody, baseURL) {
   const dom = new JSDOM(htmlBody);
   const listOfUrls = [];
-  dom.window.document
-    .querySelectorAll('a')
-    .forEach((link) => {
-      console.log(link.href);
-      listOfUrls.push(link.href);
-    });
 
-  return listOfUrls;
+  const aLinks = dom.window.document.querySelectorAll('a')
+  for (const a of aLinks){
+    //checking if has a path from b
+    if (a.href.slice(0,1) === '/'){
+      try {
+        listOfUrls.push(new URL(a.href, baseURL).href)
+      } catch (err){
+        console.log(`${err.message}: ${a.href}`)
+      }
+    } 
+    else {
+      try {
+        listOfUrls.push(new URL(a.href).href)
+      } catch (err){
+        console.log(`${err.message}: ${a.href}`)
+      }
+    }
+  }
+
+  return listOfUrls
 }
 
 module.exports = {
   normalizeURL,
-  getURLsFromHTML,
+  getURLsFromHTML
 };
