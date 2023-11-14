@@ -61,8 +61,6 @@ async function crawlPage(baseUrl, currentUrl, pages) {
     return pages;
   }
 
-  console.log(`crawling ${currentUrl}`);
-
   //2. Getting normalized version of url
   const checkURL = normalizeURL(currentUrl);
   const normBase = normalizeURL(base);
@@ -86,7 +84,9 @@ async function crawlPage(baseUrl, currentUrl, pages) {
     }
   }
 
-  //getting html from currentUrl
+  //5. Make a fetch request to new url (currentUrl)
+  console.log(`crawling ${currentUrl}`);
+  
   try 
   {
     const response = await fetch(currentUrl)
@@ -106,8 +106,15 @@ async function crawlPage(baseUrl, currentUrl, pages) {
       return ;
     }
 
-    //outputs the html text
-    console.log(await response.text)
+    //6. Get a list of all the URLs from response the html code
+    //gets the html code if fetch was successful
+    const htmlCode = await response.text;
+
+    //gets list of URLs from htmlCode
+    const listOfUrls = getURLsFromHTML(htmlCode);
+
+    //7. Recursively call each URL found
+
   } catch (err)
   {
     console.log(`${err.message}`)

@@ -11,10 +11,11 @@ async function main(){
         console.log("URL not entered");
     }
 
-    let base = process.argv[2]
+    let base = process.argv[2];
+    let pages = {};
     console.log(`starting crawl of: ${base}`)
 
-    await crawlPage(base, base, {})
+    await crawlPage(base, base, pages)
 }
 
 main()
