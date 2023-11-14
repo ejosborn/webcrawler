@@ -8,7 +8,8 @@ function normalizeURL(url) {
 
   //slices last char off if is '/' to normalize URL
   //e.g. https://espn.com/nfl/ => https://espn.com/nfl
-  if (path.charAt(path.length - 1) === '/') {
+  if (path.charAt(path.length - 1) === '/') 
+  {
     path = path.slice(0, path.length - 1);
   }
 
@@ -22,19 +23,25 @@ function getURLsFromHTML(htmlBody, baseURL) {
   const listOfUrls = [];
   const aLinks = dom.window.document.querySelectorAll('a')
 
-  for (const a of aLinks) {
+  for (const a of aLinks) 
+  {
     //checking if has a path from baseURL
     if (a.href.slice(0,1) === '/'){
-      try {
+      try 
+      {
         listOfUrls.push(new URL(a.href, baseURL).href)
-      } catch (err){
+      } catch (err) 
+      {
         console.log(`${err.message}: ${a.href}`)
       }
     }
-    else {
-      try {
+    else 
+    {
+      try 
+      {
         listOfUrls.push(new URL(a.href).href)
-      } catch (err){
+      } catch (err) 
+      {
         console.log(`${err.message}: ${a.href}`)
       }
     }
@@ -58,20 +65,30 @@ async function crawlPage(baseUrl, currentUrl, pages) {
 
   //2. Getting normalized version of url
   const checkURL = normalizeURL(currentUrl);
+  const normBase = normalizeURL(base);
 
-  //3. Check if pages has entry of normalized url. Increment entry if exists. Otherwise, create entry
-  if(checkURL in pages) {
-    pages[checkURL] = (pages[checkURL] || 0) + 1;
+  //3. Check if pages has entry of normalized url. Increment entry if exists
+  if(checkURL in pages) 
+  {
+    pages[checkURL] = (pages[checkURL] || 1) + 1;
+    return pages;
   }
-  else {
-    pages.push({
-      key: `${checkURL}`,
-      value: 1
-      })
+  else 
+  {
+  //4. Add entry and initialize to 1 if not exist. Initialize to 0 if checkURL is same as baseURL
+    if (checkURL === normBase)
+    {
+      pages[checkURL] = 0
+    }
+    else 
+    {
+      pages[checkURL] = 1
+    }
   }
 
   //getting html from currentUrl
-  try {
+  try 
+  {
     const response = await fetch(currentUrl)
     const respType = response.headers.get('content-type');
 
@@ -96,6 +113,8 @@ async function crawlPage(baseUrl, currentUrl, pages) {
     console.log(`${err.message}`)
   }
   
+  //8. Return updated pages
+  return pages;
 }
 
 module.exports = {
