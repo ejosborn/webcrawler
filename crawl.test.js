@@ -28,7 +28,7 @@ test('http://blog.boot.dev/path to blog.boot.dev/path', () => {
     'blog.boot.dev/path'
   );
 });
-*/
+
 
 // tests getURLsFromHTML function
 
@@ -45,3 +45,4 @@ test('given html code, should return https://blog.boot.dev', () => {
     )
   ).toBe([ 'https://blog.boot.dev/', 'https://espn.com/' ]);
 });
+*/
