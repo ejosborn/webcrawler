@@ -41,4 +41,5 @@ npm run start [YOUR_URL]
 ```
 
 The program will then return a report all of the internal links it has come across. The following screenshot shows the output after a successful web crawl:
+
 ![report](https://github.com/ejosborn/webcrawler/assets/92602032/4e415ad3-3c2e-4a6e-a9d3-5f5ec0796471)
