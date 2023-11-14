@@ -27,6 +27,7 @@ function getURLsFromHTML(htmlBody, baseURL) {
   {
     //checking if has a path from baseURL
     if (a.href.slice(0,1) === '/'){
+      //adding url to listOfUrls
       try 
       {
         listOfUrls.push(new URL(a.href, baseURL).href)
@@ -39,6 +40,7 @@ function getURLsFromHTML(htmlBody, baseURL) {
     {
       try 
       {
+        //adding url to listOfUrls
         listOfUrls.push(new URL(a.href).href)
       } catch (err) 
       {
@@ -51,30 +53,28 @@ function getURLsFromHTML(htmlBody, baseURL) {
 
 //
 async function crawlPage(baseUrl, currentUrl, pages) {  
-  //1a. Make sure currentUrl and baseURL are on the same domain. 
   const base = new URL(baseUrl);
   const newURL = new URL(currentUrl);
 
-  //1b. If not, return the pages object.
+  //checking if urls are in same domain
   if(base.hostname !== newURL.hostname)
   {
     return pages;
   }
 
-  //2. Getting normalized version of url
+  // Getting normalized version of url
   const checkURL = normalizeURL(currentUrl);
-  const normBase = normalizeURL(base);
 
-  //3. Check if pages has entry of normalized url. Increment entry if exists
-  if(checkURL in pages) 
+  // Check if pages has entry of normalized url. Increment entry if exists
+  if(pages[checkURL] > 0) 
   {
-    pages[checkURL] = (pages[checkURL] || 1) + 1;
+    pages[checkURL]++;
     return pages;
   }
   else 
   {
-  //4. Add entry and initialize to 1 if not exist. Initialize to 0 if checkURL is same as baseURL
-    if (checkURL === normBase)
+  // Add entry and initialize to 1 if not exist. Initialize to 0 if checkURL is same as baseURL
+    if (currentUrl === baseUrl)
     {
       pages[checkURL] = 0
     }
@@ -84,43 +84,44 @@ async function crawlPage(baseUrl, currentUrl, pages) {
     }
   }
 
-  //5. Make a fetch request to new url (currentUrl)
+  // Make a fetch request to the currentUrl
   console.log(`crawling ${currentUrl}`);
-  
+  let htmlCode = ''
   try 
   {
     const response = await fetch(currentUrl)
-    const respType = response.headers.get('content-type');
+    
 
     //checking if fetch was successful or not
     if (response.status > 399)
     {
       console.log(`A ${response.status} error has occurred. Please try again`);
-      return ;
+      return pages;
     }
     
-    //checking if the content that was fetched was html/text
-    if (respType.includes('text/html'))
+    //checking if the content that was fetched was not html/text
+    const respType = response.headers.get('content-type');
+    if (!(respType.includes('text/html')))
     {
       console.log(`Got non-html response: ${respType}`);
-      return ;
+      return pages;
     }
 
-    //6. Get a list of all the URLs from response the html code
-    //gets the html code if fetch was successful
-    const htmlCode = await response.text;
-
-    //gets list of URLs from htmlCode
-    const listOfUrls = getURLsFromHTML(htmlCode);
-
-    //7. Recursively call each URL found
-
+    htmlCode = await response.text();
   } catch (err)
   {
     console.log(`${err.message}`)
   }
   
-  //8. Return updated pages
+  //gets list of URLs from htmlCode
+  const listOfUrls = getURLsFromHTML(htmlCode, baseUrl);
+
+  //recursive call to each url in the list
+  for(const url of listOfUrls)
+  {
+    pages = await crawlPage(baseUrl, url, pages);
+  } 
+
   return pages;
 }
 
